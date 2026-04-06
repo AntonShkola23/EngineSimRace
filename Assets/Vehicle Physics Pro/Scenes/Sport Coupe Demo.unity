@@ -1220,6 +1220,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 130676282}
   m_CullTransparentMesh: 0
+--- !u!82 &134793802 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 2133823903629047040, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
+  m_PrefabInstance: {fileID: 172037547}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &151422427
 GameObject:
   m_ObjectHideFlags: 0
@@ -1695,7 +1700,7 @@ PrefabInstance:
     - target: {fileID: 2103130699097561338, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
       propertyPath: engine.audioSource
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 134793802}
     - target: {fileID: 6543824245173109062, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
       propertyPath: m_RootOrder
       value: 9
@@ -8420,21 +8425,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2070742902277938626, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
   m_PrefabInstance: {fileID: 172037547}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1568392029
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1568392025}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65fe8f005fcd9164f98f3b2a7d297648, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  vehicleController: {fileID: 1799665138}
-  minRPM: 800
-  maxRPM: 7500
 --- !u!82 &1568392030
 AudioSource:
   m_ObjectHideFlags: 0
