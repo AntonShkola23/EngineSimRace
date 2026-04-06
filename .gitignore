@@ -1,0 +1,71 @@
+# =============================================
+# Unity — временные и генерируемые папки (игнорируем)
+# =============================================
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emory[Cc]aptures/
+
+# Package Manager — оставляем только манифесты
+/Packages/*
+!Packages/manifest.json
+!Packages/packages-lock.json
+
+# =============================================
+# Vehicle Physics Pro Community Edition
+# =============================================
+# Добавляем в репозиторий 
+Assets/Vehicle Physics Pro/
+
+# =============================================
+# Engine Simulator
+# =============================================
+# Игнорируем бинарники и установочные файлы
+EngineSimulator/bin/
+EngineSimulator/installation/
+**/bin/engine-sim-app.exe
+**/installation/
+
+# Сохраняем только .mr скрипты (когда они появятся)
+!**/*.mr
+
+# =============================================
+# Audio файлы (рекомендуется позже добавить Git LFS)
+# =============================================
+*.wav
+*.mp3
+*.ogg
+*.aiff
+*.aif
+
+# =============================================
+# Общие игноры
+# =============================================
+.DS_Store
+Thumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# IDE и редакторы
+.vs/
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
+
+# Unity и C# проекты
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.user
+*.pdb
+*.log
