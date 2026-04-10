@@ -1632,6 +1632,18 @@ PrefabInstance:
       propertyPath: customCameras.Array.data[5].reference
       value: 
       objectReference: {fileID: 172037555}
+    - target: {fileID: 2069814030545375922, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
+      propertyPath: engine.maxRpm
+      value: 7010
+      objectReference: {fileID: 0}
+    - target: {fileID: 2069814030545375922, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
+      propertyPath: engine.idleRpm
+      value: 900
+      objectReference: {fileID: 0}
+    - target: {fileID: 2069814030545375922, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
+      propertyPath: engine.peakRpm
+      value: 7000
+      objectReference: {fileID: 0}
     - target: {fileID: 2069814030545375923, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
       propertyPath: enableHotKey
       value: 0
@@ -1689,9 +1701,45 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2103130699097561338, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2103130699097561338, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
       propertyPath: engine.audioSource
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 2133230724027245660, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
+      propertyPath: OutputAudioMixerGroup
+      value: 
+      objectReference: {fileID: 4087971870542434933, guid: f3cb3c23574ca54459d00d38e4567834, type: 2}
+    - target: {fileID: 2133263217539671040, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
+      propertyPath: OutputAudioMixerGroup
+      value: 
+      objectReference: {fileID: 4087971870542434933, guid: f3cb3c23574ca54459d00d38e4567834, type: 2}
+    - target: {fileID: 2133694689188129452, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
+      propertyPath: OutputAudioMixerGroup
+      value: 
+      objectReference: {fileID: 4087971870542434933, guid: f3cb3c23574ca54459d00d38e4567834, type: 2}
+    - target: {fileID: 2133730591818203966, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
+      propertyPath: OutputAudioMixerGroup
+      value: 
+      objectReference: {fileID: -7635350715671003519, guid: f3cb3c23574ca54459d00d38e4567834, type: 2}
+    - target: {fileID: 2134486473706334822, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
+      propertyPath: OutputAudioMixerGroup
+      value: 
+      objectReference: {fileID: 4087971870542434933, guid: f3cb3c23574ca54459d00d38e4567834, type: 2}
+    - target: {fileID: 2134501506954372636, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
+      propertyPath: OutputAudioMixerGroup
+      value: 
+      objectReference: {fileID: 4087971870542434933, guid: f3cb3c23574ca54459d00d38e4567834, type: 2}
+    - target: {fileID: 2134549841692662280, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
+      propertyPath: OutputAudioMixerGroup
+      value: 
+      objectReference: {fileID: 4087971870542434933, guid: f3cb3c23574ca54459d00d38e4567834, type: 2}
+    - target: {fileID: 2134551708789796978, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
+      propertyPath: OutputAudioMixerGroup
+      value: 
+      objectReference: {fileID: 4087971870542434933, guid: f3cb3c23574ca54459d00d38e4567834, type: 2}
     - target: {fileID: 6543824245173109062, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
       propertyPath: m_RootOrder
       value: 9
@@ -9945,9 +9993,20 @@ MonoBehaviour:
   vehicleController: {fileID: 0}
   cylinders: 6
   minRPM: 900
-  maxRPM: 7800
-  idleVolume: 0.6
+  maxRPM: 7000
+  idleVolume: 0.3
   fullThrottleVolume: 1.4
+  enableHarmonics: 1
+  enableDirtyLowLayer: 1
+  enableMechanicalNoise: 1
+  lfoSpeed: 4.5
+  lfoPitchDepth: 0.018
+  lfoVolumeDepth: 0.065
+  audioSource: {fileID: 0}
+  currentRPM: 0
+  currentThrottle: 0
+  phase: 0
+  noisePhase: 0
 --- !u!82 &1996364202
 AudioSource:
   m_ObjectHideFlags: 0
@@ -9957,7 +10016,7 @@ AudioSource:
   m_GameObject: {fileID: 1996364199}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -7451543992217151731, guid: f3cb3c23574ca54459d00d38e4567834, type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 1
   m_Volume: 1
