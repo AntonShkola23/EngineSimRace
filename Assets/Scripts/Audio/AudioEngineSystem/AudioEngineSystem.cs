@@ -16,6 +16,15 @@ public class AudioEngineSystem : MonoBehaviour
     [Tooltip("Включить подробное логирование в консоль")]
     public bool enableDebugLogs = true;
 
+    [Header("=== LIVE TUNING 1-Й ГАРМОНИКИ (Play Mode) ===")]
+    [Range(0.5f, 1.5f)]
+    [Tooltip("Множитель частоты 1-й гармоники")]
+    public float fundamentalMultiplier = 1.0f;
+
+    [Range(-20f, 20f)]
+    [Tooltip("Смещение частоты 1-й гармоники в Гц")]
+    public float fundamentalOffsetHz = 0f;
+
     // Модули
     private AudioEnginePhysics physics;
     private AudioEngineLayers layers;           // ← Новый слой генерации звука
@@ -81,7 +90,7 @@ public class AudioEngineSystem : MonoBehaviour
 
         for (int i = 0; i < data.Length; i += channels)
         {
-            float sample = layers.GetSample();
+            float sample = layers.GetSample(fundamentalMultiplier, fundamentalOffsetHz);
 
             for (int c = 0; c < channels; c++)
             {
