@@ -1,62 +1,49 @@
 ﻿using UnityEngine;
 using VehiclePhysics;
 
-/// <summary>
-/// AudioEngineSystem — ГЛАВНЫЙ ДИРИЖЁР всей системы.
-/// Единственный MonoBehaviour, который должен висеть на объекте Car Audio.
-/// </summary>
 [RequireComponent(typeof(AudioSource))]
 public class AudioEngineSystem : MonoBehaviour
 {
     [Header("Engine Preset")]
-    [Tooltip("Перетащите сюда пресет двигателя (например VR38DETT)")]
     public AudioEnginePresetSO currentPreset;
 
     [Header("Debug")]
-    [Tooltip("Включить подробное логирование в консоль")]
-    public bool enableDebugLogs = true;
+    public bool DebugLogs = true;
 
-    [Header("=== LIVE TUNING 1-Й ГАРМОНИКИ (Play Mode) ===")]
-    [Range(0.5f, 1.5f)]
-    [Tooltip("Множитель частоты 1-й гармоники")]
-    public float fundamentalMultiplier = 1.0f;
+    [Header("Layer Control")]
+    public bool MainHarmonics = true;
 
-    [Range(-20f, 20f)]
-    [Tooltip("Смещение частоты 1-й гармоники в Гц")]
-    public float fundamentalOffsetHz = 0f;
+    public bool AdditionalLayers = true;                    // ← выключает все добавочные слои сразу
+    public bool LowBodyLayer = true;
+    public bool MechanicalNoise = true;
+    public bool WhiteNoise = true;
 
-    // Модули
+    [Header("Layer Volumes")]
+    [Range(0f, 2f)] public float LayersMaster= 1f;   // ← мастер-ползунок
+    [Range(0f, 2f)] public float lowBody = 1f;
+    [Range(0f, 2f)] public float mechanicalNoise = 1f;
+    [Range(0f, 2f)] public float whiteNoise = 1f;
+    
+
     private AudioEnginePhysics physics;
-    private AudioEngineLayers layers;           // ← Новый слой генерации звука
+    private AudioEngineLayers layers;
     private AudioSource audioSource;
-
-    private float lastLogTime = 0f;
 
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>();
         audioSource.loop = true;
         audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 1f;   // 3D звук
+        audioSource.spatialBlend = 1f;
 
         physics = new AudioEnginePhysics();
 
-        // Инициализация физики
         if (currentPreset != null)
-        {
             physics.Initialize(currentPreset);
-            Debug.Log($"[AudioEngineSystem] Загружен пресет: {currentPreset.EngineName}");
-        }
         else
-        {
-            Debug.LogWarning("[AudioEngineSystem] Preset не назначен. Используются дефолтные значения.");
             physics.InitializeDefault();
-        }
 
-        // Создаём слой генерации звука
         layers = new AudioEngineLayers(physics);
-
-        Debug.Log("[AudioEngineSystem] Полностью инициализирован (Фаза 2)");
     }
 
     private void Update()
@@ -68,34 +55,35 @@ public class AudioEngineSystem : MonoBehaviour
 
         float rpm = vpp.data.Get(Channel.Vehicle, VehicleData.EngineRpm) / 1000f;
         float throttle = vpp.data.Get(Channel.Input, InputData.Throttle) / 10000f;
+        float load = throttle;
 
-        physics.Update(rpm, throttle, 0.7f);
+        physics.Update(rpm, throttle, load);
 
-        if (enableDebugLogs && Time.time - lastLogTime > 1f)
-        {
-            lastLogTime = Time.time;
-            Debug.Log($"[Physics] RPM:{physics.CurrentRPM:F0} | Throttle:{physics.CurrentThrottle:F2} | " +
-                      $"Firing:{physics.FiringFrequency:F1}Hz | Mech:{physics.MechanicalNoiseLevel:F2} | Stage:{physics.EngineStage}");
-        }
+        if (rpm > 400f && !audioSource.isPlaying)
+            audioSource.Play();
+        else if (rpm < 400f && audioSource.isPlaying)
+            audioSource.Stop();
     }
 
     private void OnAudioFilterRead(float[] data, int channels)
     {
-        if (physics.CurrentRPM < 400f)
-        {
-            for (int i = 0; i < data.Length; i++)
-                data[i] = 0f;
-            return;
-        }
+        if (layers == null) return;
 
         for (int i = 0; i < data.Length; i += channels)
         {
-            float sample = layers.GetSample(fundamentalMultiplier, fundamentalOffsetHz);
+            float sample = layers.GetSample(
+                MainHarmonics,
+                AdditionalLayers,
+                LowBodyLayer,
+                MechanicalNoise,
+                WhiteNoise,
+                lowBody,
+                mechanicalNoise,
+                whiteNoise,
+                LayersMaster);
 
             for (int c = 0; c < channels; c++)
-            {
                 data[i + c] = sample;
-            }
         }
     }
 }
