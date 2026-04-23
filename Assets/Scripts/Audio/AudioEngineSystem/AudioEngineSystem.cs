@@ -25,10 +25,21 @@ public class AudioEngineSystem : MonoBehaviour
     [Range(0f, 2f)] public float whiteNoise = 1f;
 
     [Header("Pulse Volume")]
-    [Range(0f, 3f)] public float pulseVolume = 1.0f;     // ← новая ручка громкости для Pulse
+    [Range(0f, 3f)] public float pulseVolume = 1.0f;
+
+    [Header("Harmonics Distortion")]
+    [Range(0f, 5f)] public float distortionAmount = 3.2f;
+
+    [Header("Air Absorption")]
+    [Range(0f, 2f)] public float airAbsorption = 0.85f;
+
+    [Header("Clatter / Treщotka Control")]
+    [Range(0f, 2f)] public float clatterVolume = 1.0f;     // громкость трещотки
+    [Range(0.5f, 4f)] public float clatterPitch = 1.8f;    // частота / скорость трещотки
 
     private AudioEnginePhysics physics;
-    private AudioEngineLayers layers;
+    private AudioEngineHarmonics harmonics;
+    private AudioEngineNoise noise;
     private AudioSource audioSource;
 
     private void Awake()
@@ -44,7 +55,8 @@ public class AudioEngineSystem : MonoBehaviour
         else
             physics.InitializeDefault();
 
-        layers = new AudioEngineLayers(physics);
+        harmonics = new AudioEngineHarmonics(physics);
+        noise = new AudioEngineNoise(physics);
     }
 
     private void Update()
@@ -67,12 +79,12 @@ public class AudioEngineSystem : MonoBehaviour
 
     private void OnAudioFilterRead(float[] data, int channels)
     {
-        if (layers == null) return;
+        if (harmonics == null || noise == null) return;
 
         for (int i = 0; i < data.Length; i += channels)
         {
-            float sample = layers.GetSample(
-                MainHarmonics,
+            float harm = harmonics.GetSample(MainHarmonics, distortionAmount, airAbsorption, clatterVolume, clatterPitch);
+            float nois = noise.GetSample(
                 AdditionalLayers,
                 LowBodyLayer,
                 MechanicalNoise,
@@ -82,7 +94,9 @@ public class AudioEngineSystem : MonoBehaviour
                 whiteNoise,
                 LayersMaster,
                 EnablePulseLayer,
-                pulseVolume);   // ← новая ручка
+                pulseVolume);
+
+            float sample = harm + nois;
 
             for (int c = 0; c < channels; c++)
                 data[i + c] = sample;
