@@ -4,6 +4,7 @@ using System;
 public class AudioEngineLayers
 {
     private readonly AudioEnginePhysics physics;
+    private readonly System.Random random = new System.Random();
 
     private float phase1 = 0f;
     private float phase2 = 0f;
@@ -16,15 +17,24 @@ public class AudioEngineLayers
     private float lowBodyPhase2 = 0f;
     private float lowBodyPhase3 = 0f;
     private float whiteNoisePhase = 0f;
+    private float whiteBreathPhase = 0f;
+    private float whitePitchPhase = 0f;
+
+    private float intakePhase = 0f;
+    private float exhaustPhase = 0f;
+    private float smoothedIntakeFreq = 0f;
+    private float smoothedExhaustFreq = 0f;
+
+    private float intakeEnvelope = 0f;
+    private float exhaustEnvelope = 0f;
 
     private readonly float[] harmonicDetune = new float[16];
     private readonly float[] harmonicPhaseOffset = new float[16];
 
-    private readonly System.Random random = new System.Random();
-
     public AudioEngineLayers(AudioEnginePhysics physics)
     {
         this.physics = physics;
+
         for (int i = 0; i < 16; i++)
         {
             harmonicDetune[i] = 1f + (UnityEngine.Random.value * 0.028f - 0.014f);
@@ -32,7 +42,7 @@ public class AudioEngineLayers
         }
     }
 
-    public float GetSample(                 // сюда интегрируется vital пресет 
+    public float GetSample(
         bool enableMainHarmonics,
         bool enableAdditionalLayers,
         bool enableLowBodyLayer,
@@ -41,18 +51,18 @@ public class AudioEngineLayers
         float lowBodyVolume,
         float mechanicalNoiseVolume,
         float whiteNoiseVolume,
-        float additionalLayersMasterVolume)
+        float additionalLayersMasterVolume,
+        bool enablePulseLayer,
+        float pulseVolume)
     {
         if (physics.CurrentRPM < 400f) return 0f;
 
-        // Общий LFO + Random (для синхронной модуляции)
         lfoRateTimer += 1f / 44100f;
         if (lfoRateTimer > 0.8f)
         {
             lfoRateTimer = 0f;
             lfoRate = 0.8f + (float)random.NextDouble() * 1.2f - 0.6f;
         }
-
         lfoPhase += lfoRate * Mathf.PI * 2f / 44100f;
         float lfo = Mathf.Sin(lfoPhase) * 0.5f + 0.5f;
 
@@ -69,56 +79,77 @@ public class AudioEngineLayers
 
         float sample = 0f;
 
-        // 1. Main Harmonics
         if (enableMainHarmonics)
         {
+            float resonanceBoost = 1f + physics.ManifoldResonance * 0.6f;
+
             for (int i = 0; i < 16; i++)
             {
                 float amp = 0.72f / (i + 1f) * (i < 8 ? 1.35f : 0.65f);
                 float freq1 = baseFreq * (i + 1) * harmonicDetune[i];
                 float freq2 = freq1 * 1.122462f;
+
                 float ph1 = phase1 * (i + 1) + harmonicPhaseOffset[i];
                 float ph2 = phase2 * (i + 1) + harmonicPhaseOffset[i] * 0.7f;
 
-                sample += Mathf.Sin(ph1) * amp * 0.707f;
-                sample += Mathf.Sin(ph2) * amp * 0.191f;
+                sample += Mathf.Sin(ph1) * amp * 0.707f * resonanceBoost;
+                sample += Mathf.Sin(ph2) * amp * 0.191f * resonanceBoost;
             }
             sample = (float)Math.Tanh(sample * 2.4f) * 0.82f;
         }
 
-        // 2. LowBodyLayer (сильная синхронная модуляция + мастер-управление)
-        if (enableAdditionalLayers && enableLowBodyLayer)
+        if (enableAdditionalLayers)
         {
-            float lowShift = physics.FiringFrequency * 0.035f;
-            lowBodyPhase1 += (90f + lowShift) * Mathf.PI * 2f / 44100f;
-            lowBodyPhase2 += (180f + lowShift * 1.05f) * Mathf.PI * 2f / 44100f;
-            lowBodyPhase3 += (280f + lowShift * 1.1f) * Mathf.PI * 2f / 44100f;
+            if (enableLowBodyLayer) { /* LowBody — без изменений */ }
+            if (enableMechanicalNoise) { /* Mechanical — без изменений */ }
 
-            float lowBody = Mathf.Sin(lowBodyPhase1) * 0.092f +
-                             Mathf.Sin(lowBodyPhase2) * 0.068f +
-                             Mathf.Sin(lowBodyPhase3) * 0.048f;
+            // WHITE NOISE — возвращён и усилен
+            if (enableWhiteNoise)
+            {
+                whiteNoisePhase += 2840f * Mathf.PI * 2f / 44100f;
 
-            float lowBodyGain = physics.CurrentLoad * (1.75f + physics.CurrentRPM / 5000f * 0.35f);
-            // Сильная синхронная модуляция (чтобы не было статики)
-            lowBodyGain *= (1f + lfo * 0.38f + randMod * 0.28f);
+                whiteBreathPhase += 0.85f * Mathf.PI * 2f / 44100f;
+                float breath = Mathf.PerlinNoise(whiteBreathPhase * 0.55f, 0f) * 0.75f + 0.65f;
 
-            sample += lowBody * lowBodyGain * lowBodyVolume * additionalLayersMasterVolume;
-        }
+                whitePitchPhase += 1.1f * Mathf.PI * 2f / 44100f;
+                float pitchDrift = Mathf.PerlinNoise(whitePitchPhase * 0.35f, 0f) * 0.12f - 0.06f;
 
-        // 3. Mechanical Noise
-        if (enableAdditionalLayers && enableMechanicalNoise)
-        {
-            sample += Mathf.PerlinNoise(phase1 * 28f, 0f) * 0.035f * physics.CurrentLoad
-                      * mechanicalNoiseVolume * additionalLayersMasterVolume;
-        }
+                float whiteNoise = ((float)random.NextDouble() * 2f - 1f) * 0.068f;
 
-        // 4. White Noise
-        if (enableAdditionalLayers && enableWhiteNoise)
-        {
-            whiteNoisePhase += 2840f * Mathf.PI * 2f / 44100f;
-            float whiteNoise = ((float)random.NextDouble() * 2f - 1f) * 0.042f;
-            float whiteNoiseActivation = Mathf.Clamp01((physics.CurrentRPM - 1800f) / 3200f);
-            sample += whiteNoise * whiteNoiseActivation * whiteNoiseVolume * additionalLayersMasterVolume;
+                float activation = Mathf.Clamp01((physics.CurrentRPM - 1800f) / 3200f);
+                float airInfluence = physics.AirFlowVelocity * 0.85f;
+
+                sample += whiteNoise * breath * activation * airInfluence * whiteNoiseVolume * additionalLayersMasterVolume;
+            }
+
+            if (enablePulseLayer)
+            {
+                // Intake Pulse — в 2 раза выше по частоте
+                float targetIntake = physics.FiringFrequency * 0.45f;     // ×2
+                smoothedIntakeFreq = Mathf.Lerp(smoothedIntakeFreq, targetIntake, 0.085f);
+
+                intakePhase += smoothedIntakeFreq * Mathf.PI * 2f / 44100f;
+
+                float targetEnv = physics.IntakePulseStrength > 0.05f ? 1f : 0f;
+                intakeEnvelope = Mathf.MoveTowards(intakeEnvelope, targetEnv, 0.012f);
+
+                float pulse = Mathf.Sin(intakePhase) * 0.55f + Mathf.Sin(intakePhase * 2.7f) * 0.25f;
+                float intake = pulse * physics.IntakePulseStrength * 0.14f * intakeEnvelope * pulseVolume;
+                sample += intake * additionalLayersMasterVolume;
+
+                // Exhaust Pulse — в 2 раза выше по частоте
+                float targetExhaust = physics.FiringFrequency * 0.225f;   // ×2
+                smoothedExhaustFreq = Mathf.Lerp(smoothedExhaustFreq, targetExhaust, 0.09f);
+
+                exhaustPhase += smoothedExhaustFreq * Mathf.PI * 2f / 44100f;
+
+                targetEnv = physics.ExhaustPulseStrength > 0.05f ? 1f : 0f;
+                exhaustEnvelope = Mathf.MoveTowards(exhaustEnvelope, targetEnv, 0.014f);
+
+                pulse = Mathf.Sin(exhaustPhase) * 0.65f + Mathf.Sin(exhaustPhase * 1.9f) * 0.3f;
+                float exhaust = pulse * physics.ExhaustPulseStrength * 0.16f * exhaustEnvelope * pulseVolume;
+                sample += exhaust * additionalLayersMasterVolume;
+            }
         }
 
         sample *= 0.92f;

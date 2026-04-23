@@ -12,18 +12,20 @@ public class AudioEngineSystem : MonoBehaviour
 
     [Header("Layer Control")]
     public bool MainHarmonics = true;
-
-    public bool AdditionalLayers = true;                    // ← выключает все добавочные слои сразу
+    public bool AdditionalLayers = true;
     public bool LowBodyLayer = true;
     public bool MechanicalNoise = true;
     public bool WhiteNoise = true;
+    public bool EnablePulseLayer = true;
 
     [Header("Layer Volumes")]
-    [Range(0f, 2f)] public float LayersMaster= 1f;   // ← мастер-ползунок
+    [Range(0f, 2f)] public float LayersMaster = 1f;
     [Range(0f, 2f)] public float lowBody = 1f;
     [Range(0f, 2f)] public float mechanicalNoise = 1f;
     [Range(0f, 2f)] public float whiteNoise = 1f;
-    
+
+    [Header("Pulse Volume")]
+    [Range(0f, 3f)] public float pulseVolume = 1.0f;     // ← новая ручка громкости для Pulse
 
     private AudioEnginePhysics physics;
     private AudioEngineLayers layers;
@@ -37,7 +39,6 @@ public class AudioEngineSystem : MonoBehaviour
         audioSource.spatialBlend = 1f;
 
         physics = new AudioEnginePhysics();
-
         if (currentPreset != null)
             physics.Initialize(currentPreset);
         else
@@ -49,7 +50,6 @@ public class AudioEngineSystem : MonoBehaviour
     private void Update()
     {
         if (physics == null) return;
-
         VPVehicleController vpp = GetComponentInParent<VPVehicleController>();
         if (vpp == null) return;
 
@@ -57,7 +57,7 @@ public class AudioEngineSystem : MonoBehaviour
         float throttle = vpp.data.Get(Channel.Input, InputData.Throttle) / 10000f;
         float load = throttle;
 
-        physics.Update(rpm, throttle, load); // передача данных в physics
+        physics.Update(rpm, throttle, load);
 
         if (rpm > 400f && !audioSource.isPlaying)
             audioSource.Play();
@@ -80,7 +80,9 @@ public class AudioEngineSystem : MonoBehaviour
                 lowBody,
                 mechanicalNoise,
                 whiteNoise,
-                LayersMaster); // запрос в AEL на звук
+                LayersMaster,
+                EnablePulseLayer,
+                pulseVolume);   // ← новая ручка
 
             for (int c = 0; c < channels; c++)
                 data[i + c] = sample;
