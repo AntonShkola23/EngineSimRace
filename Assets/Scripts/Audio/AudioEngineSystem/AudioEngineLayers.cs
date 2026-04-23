@@ -32,7 +32,7 @@ public class AudioEngineLayers
         }
     }
 
-    public float GetSample(
+    public float GetSample(                 // сюда интегрируется vital пресет 
         bool enableMainHarmonics,
         bool enableAdditionalLayers,
         bool enableLowBodyLayer,

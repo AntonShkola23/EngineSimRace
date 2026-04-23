@@ -57,7 +57,7 @@ public class AudioEngineSystem : MonoBehaviour
         float throttle = vpp.data.Get(Channel.Input, InputData.Throttle) / 10000f;
         float load = throttle;
 
-        physics.Update(rpm, throttle, load);
+        physics.Update(rpm, throttle, load); // передача данных в physics
 
         if (rpm > 400f && !audioSource.isPlaying)
             audioSource.Play();
@@ -80,7 +80,7 @@ public class AudioEngineSystem : MonoBehaviour
                 lowBody,
                 mechanicalNoise,
                 whiteNoise,
-                LayersMaster);
+                LayersMaster); // запрос в AEL на звук
 
             for (int c = 0; c < channels; c++)
                 data[i + c] = sample;

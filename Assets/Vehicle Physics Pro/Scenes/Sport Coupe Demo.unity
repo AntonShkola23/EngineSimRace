@@ -10086,10 +10086,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19c5096fadb7f0b4ba5fd57691480795, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentPreset: {fileID: 11400000, guid: bab0288a7d3355542b35078675343086, type: 2}
-  enableDebugLogs: 1
-  fundamentalMultiplier: 1.5
-  fundamentalOffsetHz: 20
+  currentPreset: {fileID: 0}
+  DebugLogs: 1
+  MainHarmonics: 1
+  AdditionalLayers: 1
+  LowBodyLayer: 1
+  MechanicalNoise: 1
+  WhiteNoise: 1
+  LayersMaster: 1
+  lowBody: 1
+  mechanicalNoise: 1
+  whiteNoise: 1
 --- !u!224 &2008460098 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6825728240663273301, guid: e5682ca1fe94a03449dc3d9ac69945f7, type: 3}
