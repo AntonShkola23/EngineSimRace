@@ -7,6 +7,7 @@ public class AudioEngineHarmonics
 
     private float phase1 = 0f;
     private float phase2 = 0f;
+    private float modulatorPhase = 0f;        // ← новая фаза для FM
     private float lfoPhase = 0f;
     private float lfoRate = 0.8f;
     private float lfoRateTimer = 0f;
@@ -27,10 +28,12 @@ public class AudioEngineHarmonics
     }
 
     public float GetSample(bool enableMainHarmonics, float distortionAmount, float airAbsorption,
-                           float clatterVolume, float clatterPitch)
+                           float clatterVolume, float clatterPitch,
+                           float fmAmount, float fmRatio, float fmThrottleSensitivity)
     {
         if (!enableMainHarmonics || physics.CurrentRPM < 400f) return 0f;
 
+        // LFO + Random
         lfoRateTimer += 1f / 44100f;
         if (lfoRateTimer > 0.8f)
         {
@@ -45,8 +48,13 @@ public class AudioEngineHarmonics
 
         float baseFreq = physics.FiringFrequency * (1f + lfo * 0.018f + randMod * 0.012f);
 
-        phase1 += baseFreq * Mathf.PI * 2f / 44100f;
-        phase2 += baseFreq * 1.122462f * Mathf.PI * 2f / 44100f;
+        // === FM МОДУЛЯЦИЯ ===
+        float fmMod = fmAmount * (1f + physics.CurrentThrottle * fmThrottleSensitivity);
+        modulatorPhase += baseFreq * fmRatio * Mathf.PI * 2f / 44100f;
+        float fmOffset = Mathf.Sin(modulatorPhase) * fmMod;
+
+        phase1 += (baseFreq + fmOffset) * Mathf.PI * 2f / 44100f;
+        phase2 += (baseFreq + fmOffset) * 1.122462f * Mathf.PI * 2f / 44100f;
 
         if (phase1 > Mathf.PI * 2f) phase1 -= Mathf.PI * 2f;
         if (phase2 > Mathf.PI * 2f) phase2 -= Mathf.PI * 2f;
@@ -67,30 +75,18 @@ public class AudioEngineHarmonics
 
             float harmonic = Mathf.Sin(ph1) * 0.707f + Mathf.Sin(ph2) * 0.191f;
 
-            // === Трещотка возвращена (агрессивное искажение) ===
             float distortion = distortionAmount * (1f + physics.CurrentLoad * 0.8f);
-
             if (harmIndex <= 5) distortion *= 1.3f;
             if (harmIndex >= 11) distortion *= 0.75f;
 
             harmonic = (float)Math.Tanh(harmonic * distortion) * 0.89f;
 
-            // Air Absorption
             float freqFactor = harmIndex / 16f;
             float rpmFactor = physics.CurrentRPM / 7800f;
             float highLoss = Mathf.Pow(1f - freqFactor, airAbsorption * (0.6f + rpmFactor * 1.1f));
             harmonic *= highLoss;
 
             sample += harmonic * amp * resonanceBoost;
-        }
-
-        // === Дополнительная трещотка с отдельным контролем (высокие частоты) ===
-        if (clatterVolume > 0.01f)
-        {
-            float clatterFreq = 1850f * clatterPitch;
-            float clatterPhase = phase1 * clatterFreq / baseFreq; // привязка к основной фазе
-            float clatter = Mathf.PerlinNoise(clatterPhase * 4.2f, 0f) * 0.45f;
-            sample += clatter * clatterVolume * 0.6f;
         }
 
         return sample;

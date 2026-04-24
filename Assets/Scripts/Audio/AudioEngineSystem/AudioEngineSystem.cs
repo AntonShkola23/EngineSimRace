@@ -38,7 +38,12 @@ public class AudioEngineSystem : MonoBehaviour
     [Range(0.5f, 4f)] public float clatterPitch = 1.8f;
 
     [Header("Low Body Dynamics")]
-    [Range(0f, 2f)] public float lowBodyDynamics = 1.35f;     // ← новый ползунок
+    [Range(0f, 2f)] public float lowBodyDynamics = 1.35f;
+
+    [Header("FM Synthesis")]
+    [Range(0f, 6f)] public float fmAmount = 2.8f;                    // Глубина модуляции
+    [Range(0.5f, 4f)] public float fmRatio = 2.02f;                  // Соотношение частот
+    [Range(0f, 2f)] public float fmThrottleSensitivity = 1.45f;      // Реакция на газ
 
     private AudioEnginePhysics physics;
     private AudioEngineHarmonics harmonics;
@@ -86,7 +91,16 @@ public class AudioEngineSystem : MonoBehaviour
 
         for (int i = 0; i < data.Length; i += channels)
         {
-            float harm = harmonics.GetSample(MainHarmonics, distortionAmount, airAbsorption, clatterVolume, clatterPitch);
+            float harm = harmonics.GetSample(
+                MainHarmonics,
+                distortionAmount,
+                airAbsorption,
+                clatterVolume,
+                clatterPitch,
+                fmAmount,
+                fmRatio,
+                fmThrottleSensitivity);
+
             float nois = noise.GetSample(
                 AdditionalLayers,
                 LowBodyLayer,
