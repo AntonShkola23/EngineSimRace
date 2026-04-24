@@ -22,6 +22,7 @@ public class AudioEngineNoise
     private float exhaustEnvelope = 0f;
 
     private float rumblePhase = 0f;
+    private float lowBodyLfoPhase = 0f;
 
     public AudioEngineNoise(AudioEnginePhysics physics)
     {
@@ -38,16 +39,16 @@ public class AudioEngineNoise
         float whiteNoiseVolume,
         float additionalLayersMasterVolume,
         bool enablePulseLayer,
-        float pulseVolume)
+        float pulseVolume,
+        float lowBodyDynamics)
     {
         if (!enableAdditionalLayers || physics.CurrentRPM < 400f) return 0f;
 
         float sample = 0f;
 
-        if (enableLowBodyLayer) { /* LowBody */ }
         if (enableMechanicalNoise) { /* Mechanical */ }
 
-        // === WHITE NOISE — теперь только при нажатии throttle ===
+        // === WHITE NOISE — возвращён в постоянное состояние ===
         if (enableWhiteNoise)
         {
             whiteNoisePhase += 2840f * Mathf.PI * 2f / 44100f;
@@ -60,8 +61,11 @@ public class AudioEngineNoise
 
             float whiteNoise = ((float)random.NextDouble() * 2f - 1f) * 0.068f;
 
-            // Активация ТОЛЬКО от throttle
-            float activation = Mathf.Clamp01(physics.CurrentThrottle * 2.2f);   // плавно появляется при газе
+            // Постоянная база + усиление от газа
+            float baseLevel = 0.45f;                                    // всегда присутствует
+            float throttleBoost = physics.CurrentThrottle * 1.8f;      // сильно усиливается при газе
+
+            float activation = baseLevel + throttleBoost;
 
             float airInfluence = physics.AirFlowVelocity * 0.85f;
 
@@ -73,11 +77,34 @@ public class AudioEngineNoise
             /* Pulse — без изменений */
         }
 
-        // Low Rumble (оставлен как был)
+        // Low Rumble
         float load = physics.CurrentLoad;
         rumblePhase += 68f * Mathf.PI * 2f / 44100f;
         float rumble = Mathf.PerlinNoise(rumblePhase * 0.45f, 0f) * 0.42f;
         sample += rumble * 0.9f * (0.7f + load * 0.9f);
+
+        // Low Body Dynamics (оставлен как в предыдущей версии)
+        if (enableLowBodyLayer)
+        {
+            float baseLowFreq = physics.FiringFrequency * 0.47f;
+
+            lowBodyLfoPhase += 2.1f * Mathf.PI * 2f / 44100f;
+            float lfo = Mathf.Sin(lowBodyLfoPhase) * 0.5f + 0.5f;
+
+            float throttleReaction = physics.CurrentThrottle * lowBodyDynamics * 2.4f;
+
+            lowBodyPhase1 += (baseLowFreq + lfo * 5f) * Mathf.PI * 2f / 44100f;
+            lowBodyPhase2 += (baseLowFreq * 1.97f + lfo * 7f) * Mathf.PI * 2f / 44100f;
+            lowBodyPhase3 += (baseLowFreq * 0.52f) * Mathf.PI * 2f / 44100f;
+
+            float lb = Mathf.Sin(lowBodyPhase1) * 0.75f +
+                       Mathf.Sin(lowBodyPhase2) * 0.44f +
+                       Mathf.Sin(lowBodyPhase3) * 0.31f;
+
+            float dynamics = 0.4f + throttleReaction + load * 1.1f;
+
+            sample += lb * lowBodyVolume * dynamics * additionalLayersMasterVolume;
+        }
 
         return sample;
     }

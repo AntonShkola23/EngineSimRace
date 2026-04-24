@@ -34,8 +34,11 @@ public class AudioEngineSystem : MonoBehaviour
     [Range(0f, 2f)] public float airAbsorption = 0.85f;
 
     [Header("Clatter / Treщotka Control")]
-    [Range(0f, 2f)] public float clatterVolume = 1.0f;     // громкость трещотки
-    [Range(0.5f, 4f)] public float clatterPitch = 1.8f;    // частота / скорость трещотки
+    [Range(0f, 2f)] public float clatterVolume = 1.0f;
+    [Range(0.5f, 4f)] public float clatterPitch = 1.8f;
+
+    [Header("Low Body Dynamics")]
+    [Range(0f, 2f)] public float lowBodyDynamics = 1.35f;     // ← новый ползунок
 
     private AudioEnginePhysics physics;
     private AudioEngineHarmonics harmonics;
@@ -94,7 +97,8 @@ public class AudioEngineSystem : MonoBehaviour
                 whiteNoise,
                 LayersMaster,
                 EnablePulseLayer,
-                pulseVolume);
+                pulseVolume,
+                lowBodyDynamics);
 
             float sample = harm + nois;
 
