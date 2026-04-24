@@ -10097,13 +10097,16 @@ MonoBehaviour:
   LayersMaster: 1
   lowBody: 0.079
   mechanicalNoise: 1
-  whiteNoise: 1
+  whiteNoise: 0.276
   pulseVolume: 1
   distortionAmount: 3.2
   airAbsorption: 0.85
   clatterVolume: 0.536
   clatterPitch: 0.5
   lowBodyDynamics: 1.35
+  fmAmount: 2.8
+  fmRatio: 2.02
+  fmThrottleSensitivity: 1.45
 --- !u!224 &2008460098 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6825728240663273301, guid: e5682ca1fe94a03449dc3d9ac69945f7, type: 3}
