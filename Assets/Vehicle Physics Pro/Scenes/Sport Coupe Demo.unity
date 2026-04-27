@@ -9978,35 +9978,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2070742902277938626, guid: f7a352f52c0b4034a8e157c2e33e54c4, type: 3}
   m_PrefabInstance: {fileID: 172037547}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1996364201
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1996364199}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65fe8f005fcd9164f98f3b2a7d297648, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  vehicleController: {fileID: 0}
-  cylinders: 6
-  minRPM: 900
-  maxRPM: 7000
-  idleVolume: 0.3
-  fullThrottleVolume: 1.4
-  enableHarmonics: 1
-  enableDirtyLowLayer: 1
-  enableMechanicalNoise: 1
-  lfoSpeed: 4.5
-  lfoPitchDepth: 0.018
-  lfoVolumeDepth: 0.065
-  audioSource: {fileID: 0}
-  currentRPM: 0
-  currentThrottle: 0
-  phase: 0
-  noisePhase: 0
 --- !u!82 &1996364202
 AudioSource:
   m_ObjectHideFlags: 0
@@ -10103,6 +10074,39 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1996364204
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1996364199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19c5096fadb7f0b4ba5fd57691480795, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentPreset: {fileID: 0}
+  DebugLogs: 1
+  MainHarmonics: 1
+  AdditionalLayers: 1
+  LowBodyLayer: 1
+  MechanicalNoise: 1
+  WhiteNoise: 1
+  EnablePulseLayer: 1
+  LayersMaster: 1
+  lowBody: 0.079
+  mechanicalNoise: 1
+  whiteNoise: 0.276
+  pulseVolume: 1
+  distortionAmount: 3.2
+  airAbsorption: 0.85
+  clatterVolume: 0.536
+  clatterPitch: 0.5
+  lowBodyDynamics: 1.35
+  fmAmount: 2.8
+  fmRatio: 2.02
+  fmThrottleSensitivity: 1.45
 --- !u!224 &2008460098 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6825728240663273301, guid: e5682ca1fe94a03449dc3d9ac69945f7, type: 3}
