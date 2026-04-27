@@ -10087,6 +10087,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentPreset: {fileID: 0}
+  idlePreset: {fileID: 11400000, guid: bf8742855dde53e498316a09bb4c8742, type: 2}
+  lowPreset: {fileID: 11400000, guid: 4a5b83bc04dc69648ba6e8cb32d74449, type: 2}
+  medPreset: {fileID: 11400000, guid: b2814db9a9299d444905b679fc048457, type: 2}
+  highPreset: {fileID: 11400000, guid: c83adb568c31d714584c48eca6a10698, type: 2}
+  maxPreset: {fileID: 11400000, guid: b80b915ae0237954391762f17003f7f3, type: 2}
   DebugLogs: 1
   MainHarmonics: 1
   AdditionalLayers: 1
@@ -10099,14 +10104,6 @@ MonoBehaviour:
   mechanicalNoise: 1
   whiteNoise: 0.276
   pulseVolume: 1
-  distortionAmount: 3.2
-  airAbsorption: 0.85
-  clatterVolume: 0.536
-  clatterPitch: 0.5
-  lowBodyDynamics: 1.35
-  fmAmount: 2.8
-  fmRatio: 2.02
-  fmThrottleSensitivity: 1.45
 --- !u!224 &2008460098 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6825728240663273301, guid: e5682ca1fe94a03449dc3d9ac69945f7, type: 3}
