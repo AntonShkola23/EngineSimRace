@@ -94,8 +94,8 @@ public class AudioEnginePhysics
         // Логирование (раз в секунду)
         if (Time.frameCount % 60 == 0)
         {
-            Debug.Log($"[Physics] RPM:{CurrentRPM:F0} | Throttle:{CurrentThrottle:F2} | Load:{CurrentLoad:F2} | " +
-                      $"Firing:{FiringFrequency:F1}Hz | Mech:{MechanicalNoiseLevel:F2} | Turbo:{TurboSpool:F2} | Stage:{EngineStage}");
+            Debug.Log($" RPM: {CurrentRPM:F0} | Throttle: {CurrentThrottle:F2} | Load: {CurrentLoad:F2} |");
+                      
         }
     }
 
