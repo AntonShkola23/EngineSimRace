@@ -42,24 +42,6 @@ public class AudioEnginePhysics
     // ================================================================
     // ИНИЦИАЛИЗАЦИЯ
     // ================================================================
-    public void Initialize(AudioEnginePresetSO preset)
-    {
-        if (preset == null)
-        {
-            Debug.LogWarning("[AudioEnginePhysics] Preset is null → using defaults.");
-            InitializeDefault();
-            return;
-        }
-
-        CylinderCount = preset.CylinderCount;
-        DisplacementLiters = preset.DisplacementLiters;
-        IsTurbocharged = preset.IsTurbocharged;
-        EngineStage = preset.DefaultEngineStage;
-
-        tempPhaseOffsets = new float[CylinderCount];
-
-        Debug.Log($"[AudioEnginePhysics] Initialized: {preset.EngineName} | Cylinders: {CylinderCount} | Stage: {EngineStage}");
-    }
 
     public void InitializeDefault()
     {

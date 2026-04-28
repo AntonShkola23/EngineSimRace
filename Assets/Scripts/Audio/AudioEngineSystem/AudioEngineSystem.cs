@@ -4,13 +4,11 @@ using VehiclePhysics;
 [RequireComponent(typeof(AudioSource))]
 public class AudioEngineSystem : MonoBehaviour
 {
-    [Header("Engine Preset (старый)")]
-    public AudioEnginePresetSO currentPreset;
 
     [Header("Range Presets")]
     public EngineRangePreset idlePreset;
     public EngineRangePreset lowPreset;
-    public EngineRangePreset medPreset;        // ← Новое поле для Med
+    public EngineRangePreset medPreset;       
 
     [Header("Debug")]
     public bool DebugLogs = true;
@@ -46,10 +44,7 @@ public class AudioEngineSystem : MonoBehaviour
         audioSource.spatialBlend = 1f;
 
         physics = new AudioEnginePhysics();
-        if (currentPreset != null)
-            physics.Initialize(currentPreset);
-        else
-            physics.InitializeDefault();
+        physics.InitializeDefault();        
 
         harmonics = new AudioEngineHarmonics(physics);
         noise = new AudioEngineNoise(physics);
