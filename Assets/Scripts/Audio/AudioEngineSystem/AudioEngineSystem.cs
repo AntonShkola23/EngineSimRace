@@ -4,6 +4,9 @@ using VehiclePhysics;
 [RequireComponent(typeof(AudioSource))]
 public class AudioEngineSystem : MonoBehaviour
 {
+    [Header("Master")]
+    [Tooltip("ESNS disabled while using REV. Code kept for later A/B.")]
+    public bool enableEsns = false;
 
     [Header("Range Presets")]
     public EngineRangePreset idlePreset;
@@ -43,6 +46,14 @@ public class AudioEngineSystem : MonoBehaviour
         audioSource.playOnAwake = false;
         audioSource.spatialBlend = 1f;
 
+        if (!enableEsns)
+        {
+            if (DebugLogs)
+                Debug.Log("[AudioEngineSystem] ESNS disabled (enableEsns = false). Using REV or silence.");
+            enabled = false;
+            return;
+        }
+
         physics = new AudioEnginePhysics();
         physics.InitializeDefault();        
 
@@ -63,7 +74,7 @@ public class AudioEngineSystem : MonoBehaviour
 
     private void Update()
     {
-        if (physics == null) return;
+        if (!enableEsns || physics == null) return;
         VPVehicleController vpp = GetComponentInParent<VPVehicleController>();
         if (vpp == null) return;
 
@@ -81,7 +92,9 @@ public class AudioEngineSystem : MonoBehaviour
 
     private void OnAudioFilterRead(float[] data, int channels)
     {
-        if (harmonics == null || noise == null || blender == null) return;
+        // OnAudioFilterRead still runs when script is disabled on some Unity versions —
+        // hard guard so ESNS never mixes with REV on the same AudioSource.
+        if (!enableEsns || harmonics == null || noise == null || blender == null) return;
 
         for (int i = 0; i < data.Length; i += channels)
         {

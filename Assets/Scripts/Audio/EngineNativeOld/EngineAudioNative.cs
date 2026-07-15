@@ -4,6 +4,10 @@ using VehiclePhysics;
 [RequireComponent(typeof(AudioSource))] // атрибут - контроль наличия компонента audiosource
 public class EngineAudioNative : MonoBehaviour
 {
+    [Header("Master")]
+    [Tooltip("Old ESNS path disabled while using REV. Code kept for later A/B.")]
+    public bool enableEsns = false;
+
     [Header("VPP Reference")] // добавления заголовка с описанием
     public VPVehicleController vehicleController;
     [Header("Engine Settings")]
@@ -55,10 +59,18 @@ public class EngineAudioNative : MonoBehaviour
         audioSource.loop = true; // делаем из audiosource loop
         audioSource.playOnAwake = false; // не запускаем звук при появлении объекта на сцене
         audioSource.spatialBlend = 1f; // 1f = полностью спозиционированный 3D звук
+
+        if (!enableEsns)
+        {
+            enabled = false;
+            return;
+        }
     }
 
     void Start()
     {
+        if (!enableEsns) return;
+
         if (vehicleController == null) // проверка не нулевое ли поле с контроллером
         {
             vehicleController = GetComponentInParent<VPVehicleController>(); // ищет компонент выше по иерархии (InParent)
@@ -71,7 +83,7 @@ public class EngineAudioNative : MonoBehaviour
 
     void Update()
     {
-        if (vehicleController == null) return;
+        if (!enableEsns || vehicleController == null) return;
         currentRPM = vehicleController.data.Get(Channel.Vehicle, VehicleData.EngineRpm) / 1000f; // забираем RPM и делим на 1000
         currentThrottle = vehicleController.data.Get(Channel.Input, InputData.Throttle) / 10000f; // забираем throttle и делим на 10000
         bool engineRunning = currentRPM > 400f; // если RPM больше 400 = true
@@ -84,6 +96,9 @@ public class EngineAudioNative : MonoBehaviour
     void OnAudioFilterRead(float[] data, int channels) // callback unity, который вызывается 44100 раз в секунду
                                                        // float[] data - пустой массив семплов, int channels количество каналов звука (стерео-моно)
     {
+        if (!enableEsns)
+            return;
+
         if (currentRPM < 400f) // если RPM ниже 400 буфер затирается нулями
         {
             for (int i = 0; i < data.Length; i++)
