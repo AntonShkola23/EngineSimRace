@@ -29,6 +29,9 @@ public class AudioEngineNoise
         this.physics = physics;
     }
 
+    /// <summary>
+    /// НОВАЯ СИГНАТУРА — без lowBodyDynamics
+    /// </summary>
     public float GetSample(
         bool enableAdditionalLayers,
         bool enableLowBodyLayer,
@@ -39,16 +42,13 @@ public class AudioEngineNoise
         float whiteNoiseVolume,
         float additionalLayersMasterVolume,
         bool enablePulseLayer,
-        float pulseVolume,
-        float lowBodyDynamics)
+        float pulseVolume)
     {
         if (!enableAdditionalLayers || physics.CurrentRPM < 400f) return 0f;
 
         float sample = 0f;
 
-        if (enableMechanicalNoise) { /* Mechanical */ }
-
-        // === WHITE NOISE — возвращён в постоянное состояние ===
+        // WHITE NOISE (постоянный + от газа)
         if (enableWhiteNoise)
         {
             whiteNoisePhase += 2840f * Mathf.PI * 2f / 44100f;
@@ -61,20 +61,40 @@ public class AudioEngineNoise
 
             float whiteNoise = ((float)random.NextDouble() * 2f - 1f) * 0.068f;
 
-            // Постоянная база + усиление от газа
-            float baseLevel = 0.45f;                                    // всегда присутствует
-            float throttleBoost = physics.CurrentThrottle * 1.8f;      // сильно усиливается при газе
-
+            float baseLevel = 0.45f;
+            float throttleBoost = physics.CurrentThrottle * 1.8f;
             float activation = baseLevel + throttleBoost;
-
             float airInfluence = physics.AirFlowVelocity * 0.85f;
 
             sample += whiteNoise * breath * activation * airInfluence * whiteNoiseVolume * additionalLayersMasterVolume;
         }
 
+        // Pulse Layer
         if (enablePulseLayer)
         {
-            /* Pulse — без изменений */
+            // Intake Pulse
+            float targetIntake = physics.FiringFrequency * 0.45f;
+            smoothedIntakeFreq = Mathf.Lerp(smoothedIntakeFreq, targetIntake, 0.085f);
+            intakePhase += smoothedIntakeFreq * Mathf.PI * 2f / 44100f;
+
+            float targetEnv = physics.IntakePulseStrength > 0.05f ? 1f : 0f;
+            intakeEnvelope = Mathf.MoveTowards(intakeEnvelope, targetEnv, 0.012f);
+
+            float pulse = Mathf.Sin(intakePhase) * 0.55f + Mathf.Sin(intakePhase * 2.7f) * 0.25f;
+            float intake = pulse * physics.IntakePulseStrength * 0.14f * intakeEnvelope * pulseVolume;
+            sample += intake * additionalLayersMasterVolume;
+
+            // Exhaust Pulse
+            float targetExhaust = physics.FiringFrequency * 0.225f;
+            smoothedExhaustFreq = Mathf.Lerp(smoothedExhaustFreq, targetExhaust, 0.09f);
+            exhaustPhase += smoothedExhaustFreq * Mathf.PI * 2f / 44100f;
+
+            targetEnv = physics.ExhaustPulseStrength > 0.05f ? 1f : 0f;
+            exhaustEnvelope = Mathf.MoveTowards(exhaustEnvelope, targetEnv, 0.014f);
+
+            pulse = Mathf.Sin(exhaustPhase) * 0.65f + Mathf.Sin(exhaustPhase * 1.9f) * 0.3f;
+            float exhaust = pulse * physics.ExhaustPulseStrength * 0.16f * exhaustEnvelope * pulseVolume;
+            sample += exhaust * additionalLayersMasterVolume;
         }
 
         // Low Rumble
@@ -83,7 +103,7 @@ public class AudioEngineNoise
         float rumble = Mathf.PerlinNoise(rumblePhase * 0.45f, 0f) * 0.42f;
         sample += rumble * 0.9f * (0.7f + load * 0.9f);
 
-        // Low Body Dynamics (оставлен как в предыдущей версии)
+        // Low Body Dynamics
         if (enableLowBodyLayer)
         {
             float baseLowFreq = physics.FiringFrequency * 0.47f;
@@ -91,7 +111,7 @@ public class AudioEngineNoise
             lowBodyLfoPhase += 2.1f * Mathf.PI * 2f / 44100f;
             float lfo = Mathf.Sin(lowBodyLfoPhase) * 0.5f + 0.5f;
 
-            float throttleReaction = physics.CurrentThrottle * lowBodyDynamics * 2.4f;
+            float throttleReaction = physics.CurrentThrottle * 1.35f * 2.4f;   // lowBodyDynamics теперь внутри (можно потом вынести)
 
             lowBodyPhase1 += (baseLowFreq + lfo * 5f) * Mathf.PI * 2f / 44100f;
             lowBodyPhase2 += (baseLowFreq * 1.97f + lfo * 7f) * Mathf.PI * 2f / 44100f;

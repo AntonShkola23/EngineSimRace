@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b607fd0a4c629a644a587bc3d16a4dd3, type: 3}
+  m_Name: VR38DETT_low
+  m_EditorClassIdentifier: 
+  presetName: ESNS Main Sinus Low
+  fmAmount: 3.65
+  fmRatio: 2.18
+  fmFeedback: 0.22
+  fmNoiseAmount: 0.11
+  fmEnvelopeSpeed: 1.45
+  distortionAmount: 2.85
+  airAbsorption: 1.28
+  clatterVolume: 1.35
+  clatterPitch: 2.25
+  lowBodyDynamics: 1.75
+  resonanceBoost: 1.35
+  unisonSpread: 0.038
+  pitchDriftAmount: 0.021

@@ -4,8 +4,11 @@ using VehiclePhysics;
 [RequireComponent(typeof(AudioSource))]
 public class AudioEngineSystem : MonoBehaviour
 {
-    [Header("Engine Preset")]
-    public AudioEnginePresetSO currentPreset;
+
+    [Header("Range Presets")]
+    public EngineRangePreset idlePreset;
+    public EngineRangePreset lowPreset;
+    public EngineRangePreset medPreset;       
 
     [Header("Debug")]
     public bool DebugLogs = true;
@@ -27,27 +30,10 @@ public class AudioEngineSystem : MonoBehaviour
     [Header("Pulse Volume")]
     [Range(0f, 3f)] public float pulseVolume = 1.0f;
 
-    [Header("Harmonics Distortion")]
-    [Range(0f, 5f)] public float distortionAmount = 3.2f;
-
-    [Header("Air Absorption")]
-    [Range(0f, 2f)] public float airAbsorption = 0.85f;
-
-    [Header("Clatter / Treщotka Control")]
-    [Range(0f, 2f)] public float clatterVolume = 1.0f;
-    [Range(0.5f, 4f)] public float clatterPitch = 1.8f;
-
-    [Header("Low Body Dynamics")]
-    [Range(0f, 2f)] public float lowBodyDynamics = 1.35f;
-
-    [Header("FM Synthesis")]
-    [Range(0f, 6f)] public float fmAmount = 2.8f;                    // Глубина модуляции
-    [Range(0.5f, 4f)] public float fmRatio = 2.02f;                  // Соотношение частот
-    [Range(0f, 2f)] public float fmThrottleSensitivity = 1.45f;      // Реакция на газ
-
     private AudioEnginePhysics physics;
     private AudioEngineHarmonics harmonics;
     private AudioEngineNoise noise;
+    private PresetBlender blender;
     private AudioSource audioSource;
 
     private void Awake()
@@ -58,13 +44,21 @@ public class AudioEngineSystem : MonoBehaviour
         audioSource.spatialBlend = 1f;
 
         physics = new AudioEnginePhysics();
-        if (currentPreset != null)
-            physics.Initialize(currentPreset);
-        else
-            physics.InitializeDefault();
+        physics.InitializeDefault();        
 
         harmonics = new AudioEngineHarmonics(physics);
         noise = new AudioEngineNoise(physics);
+
+        // Blender теперь поддерживает Med
+        if (idlePreset != null && lowPreset != null && medPreset != null)
+        {
+            blender = new PresetBlender(idlePreset, lowPreset, medPreset);
+            Debug.Log("[AudioEngineSystem] PresetBlender создан (Idle + Low + Med)");
+        }
+        else
+        {
+            Debug.LogWarning("[AudioEngineSystem] Не все пресеты назначены (Idle, Low, Med)");
+        }
     }
 
     private void Update()
@@ -87,19 +81,11 @@ public class AudioEngineSystem : MonoBehaviour
 
     private void OnAudioFilterRead(float[] data, int channels)
     {
-        if (harmonics == null || noise == null) return;
+        if (harmonics == null || noise == null || blender == null) return;
 
         for (int i = 0; i < data.Length; i += channels)
         {
-            float harm = harmonics.GetSample(
-                MainHarmonics,
-                distortionAmount,
-                airAbsorption,
-                clatterVolume,
-                clatterPitch,
-                fmAmount,
-                fmRatio,
-                fmThrottleSensitivity);
+            float harm = harmonics.GetSample(MainHarmonics, blender);
 
             float nois = noise.GetSample(
                 AdditionalLayers,
@@ -111,8 +97,7 @@ public class AudioEngineSystem : MonoBehaviour
                 whiteNoise,
                 LayersMaster,
                 EnablePulseLayer,
-                pulseVolume,
-                lowBodyDynamics);
+                pulseVolume);
 
             float sample = harm + nois;
 

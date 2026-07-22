@@ -5,7 +5,7 @@ using UnityEngine;
 /// Drag this asset into AudioEngineSystem to select the engine.
 /// </summary>
 [CreateAssetMenu(menuName = "Audio Engine/Preset", fileName = "New Engine Preset")]
-public class AudioEnginePresetSO : ScriptableObject
+public class AudioEngineStage : ScriptableObject
 {
     [Header("Basic Engine Information")]
     public string EngineName = "VR38DETT";
